@@ -1,0 +1,42 @@
+.Toolbar {
+    color: white;
+    background-color: #3C3F41;
+    width: 210px;
+    border-right: 1px solid #191B1C;
+}
+
+.Toolbar input[type=text] {
+    width: 45px;
+}
+
+.ToolbarInputLabelLeft {
+    margin-right: 5px;
+}
+
+.ToolbarSection {
+    margin: 5px 5px 0 5px;
+    border: 1px solid #191B1C;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.ToolbarSectionTitle {
+    padding-left: 5px;
+    /*font-weight: bold;*/
+    background-color: rgb(59, 71, 84);
+    border-bottom: 1px solid #191B1C;
+}
+
+.ToolbarSectionBody {
+    margin: 5px;
+}
+
+.ToolbarBodyCtrl {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.ToolbarInputLabel {
+    margin-left: 5px;
+    margin-right: 5px;
+}

@@ -1,0 +1,14 @@
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    overflow: hidden;
+    background-color: black;
+}
+
+#root {
+    display: flex;
+    height: 100%;
+}
