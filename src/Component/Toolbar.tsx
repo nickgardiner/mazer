@@ -50,11 +50,7 @@ export default function Toolbar({mazer}: ToolbarProps) {
 
         win.document.write('<pre>' + mazer.builder.getWavefrontObjExport(mazer) + '</pre>');
         win.document.title = 'Mazer Export';
-    }, []);
-
-    const constrainValue = useCallback((min:number, max:number) => {
-
-    }, []);
+    }, [mazer]);
 
     return (
         <div className="Toolbar">
@@ -68,7 +64,7 @@ export default function Toolbar({mazer}: ToolbarProps) {
                                onChange={(e) => {
                                    setData({
                                        ...data,
-                                       size: new DOMPoint(parseInt(e.target.value, 10), data.size.y),
+                                       size: new DOMPoint(parseFloat(e.target.value), data.size.y),
                                    });
                                }}
                         />
