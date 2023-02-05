@@ -6,38 +6,51 @@ interface ToolbarProps {
     mazer: Mazer;
 }
 
-interface MazerData {
-    size: DOMPoint,
-    cellSize: any,
-    thickness: any
+interface UserPoint2D {
+    x: string;
+    y: string;
 }
 
-function parseValue(value:string, min:number, max:number): number {
+interface MazerData {
+    size: UserPoint2D,
+    cellSize: UserPoint2D,
+    thickness: UserPoint2D
+}
+
+function parseUserFloat(value:string, min:number, max:number): number {
     const dec:number = value === '' ? 0 : parseFloat(value);
     return dec < min ? min : dec > max ? max : dec;
 }
 
+function parseUserInt(value:string, min:number, max:number): number {
+    const int:number = value === '' ? 0 : parseInt(value, 10);
+    const intMin = Math.floor(min);
+    const intMax = Math.floor(max);
+
+    return int < intMin ? intMin : int > intMax ? intMax : int;
+}
+
 export default function Toolbar({mazer}: ToolbarProps) {
     const [data, setData] = useState<MazerData>({
-        size: new DOMPoint(mazer.data.size.x, mazer.data.size.y),
-        cellSize: {x:mazer.cellSize.x, y:mazer.cellSize.y},
-        thickness: {x:mazer.thickness.x, y:mazer.thickness.y}
+        size: {x:mazer.data.size.x.toString(), y:mazer.data.size.y.toString()},
+        cellSize: {x:mazer.cellSize.x.toString(), y:mazer.cellSize.y.toString()},
+        thickness: {x:mazer.thickness.x.toString(), y:mazer.thickness.y.toString()}
     });
 
     const applyMazeCells = useCallback(() => {
-        mazer.data.size.x = data.size.x;
-        mazer.data.size.y = data.size.y;
+        mazer.data.size.x = parseUserInt(data.size.x, 1, Infinity);
+        mazer.data.size.y = parseUserInt(data.size.y, 1, Infinity);
 
         mazer.data.build();
         mazer.render();
     }, [data, mazer]);
 
     const applyCellMetrics = useCallback(() => {
-        mazer.cellSize.x = parseValue(data.cellSize.x, 0, Infinity);
-        mazer.cellSize.y = parseValue(data.cellSize.y, 0, Infinity);
+        mazer.cellSize.x = parseUserFloat(data.cellSize.x, 0, Infinity);
+        mazer.cellSize.y = parseUserFloat(data.cellSize.y, 0, Infinity);
 
-        mazer.thickness.x = parseValue(data.thickness.x, 0, 0.5);
-        mazer.thickness.y = parseValue(data.thickness.y, 0, 0.5);
+        mazer.thickness.x = parseUserFloat(data.thickness.x, 0, 0.5);
+        mazer.thickness.y = parseUserFloat(data.thickness.y, 0, 0.5);
 
         mazer.render();
     }, [data, mazer]);
@@ -64,7 +77,13 @@ export default function Toolbar({mazer}: ToolbarProps) {
                                onChange={(e) => {
                                    setData({
                                        ...data,
-                                       size: new DOMPoint(parseFloat(e.target.value), data.size.y),
+                                       size: {x:e.target.value, y:data.size.y},
+                                   });
+                               }}
+                               onBlur={(e) => {
+                                   setData({
+                                       ...data,
+                                       size: {x: parseUserInt(e.target.value, 2, Infinity).toString(), y:data.size.y}
                                    });
                                }}
                         />
@@ -74,7 +93,13 @@ export default function Toolbar({mazer}: ToolbarProps) {
                                onChange={(e) => {
                                    setData({
                                        ...data,
-                                       size: new DOMPoint(data.size.x, parseInt(e.target.value, 10)),
+                                       size: {x:data.size.x, y:e.target.value},
+                                   });
+                               }}
+                               onBlur={(e) => {
+                                   setData({
+                                       ...data,
+                                       size: {x:data.size.x, y: parseUserInt(e.target.value, 2, Infinity).toString()}
                                    });
                                }}
                         />
@@ -100,6 +125,12 @@ export default function Toolbar({mazer}: ToolbarProps) {
                                        cellSize: {x:e.target.value, y:data.cellSize.y}
                                    });
                                }}
+                               onBlur={(e) => {
+                                   setData({
+                                       ...data,
+                                       cellSize: {x: parseUserInt(e.target.value, 0, Infinity).toString(), y:data.cellSize.y}
+                                   });
+                               }}
                         />
                         <span className="ToolbarInputLabel">Y</span>
                         <input type="text"
@@ -122,6 +153,12 @@ export default function Toolbar({mazer}: ToolbarProps) {
                                        thickness: {x:e.target.value, y:data.thickness.y}
                                    });
                                }}
+                               onBlur={(e) => {
+                                   setData({
+                                       ...data,
+                                       thickness: {x: parseUserFloat(e.target.value, 0, 0.5).toString(), y:data.thickness.y}
+                                   });
+                               }}
                         />
                         <span className="ToolbarInputLabel">Y</span>
                         <input type="text"
@@ -130,6 +167,12 @@ export default function Toolbar({mazer}: ToolbarProps) {
                                    setData({
                                        ...data,
                                        thickness: {x:data.thickness.x, y:e.target.value}
+                                   });
+                               }}
+                               onBlur={(e) => {
+                                   setData({
+                                       ...data,
+                                       thickness: {x:data.thickness.x, y:parseUserFloat(e.target.value, 0, 0.5).toString()}
                                    });
                                }}
                         />
