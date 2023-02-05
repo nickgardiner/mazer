@@ -9,6 +9,10 @@
     width: 45px;
 }
 
+.Toolbar input[type=text].invalid {
+    background-color: pink;
+}
+
 .ToolbarInputLabelLeft {
     margin-right: 5px;
 }

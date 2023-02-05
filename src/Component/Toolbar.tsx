@@ -1,4 +1,5 @@
 import React, {useCallback, useState} from "react";
+import NumberInput from "./NumberInput";
 import Mazer from "../Class/Mazer";
 import "../Asset/Style/Toolbar.css";
 
@@ -6,53 +7,66 @@ interface ToolbarProps {
     mazer: Mazer;
 }
 
-interface UserPoint2D {
-    x: string;
-    y: string;
-}
-
 interface MazerData {
-    size: UserPoint2D,
-    cellSize: UserPoint2D,
-    thickness: UserPoint2D
-}
-
-function parseUserFloat(value:string, min:number, max:number): number {
-    const dec:number = value === '' ? 0 : parseFloat(value);
-    return dec < min ? min : dec > max ? max : dec;
-}
-
-function parseUserInt(value:string, min:number, max:number): number {
-    const int:number = value === '' ? 0 : parseInt(value, 10);
-    const intMin = Math.floor(min);
-    const intMax = Math.floor(max);
-
-    return int < intMin ? intMin : int > intMax ? intMax : int;
+    size: DOMPoint;
+    cellSize: DOMPoint;
+    thickness: DOMPoint;
+    mazeDirty: boolean;
+    metricsDirty: boolean;
 }
 
 export default function Toolbar({mazer}: ToolbarProps) {
     const [data, setData] = useState<MazerData>({
-        size: {x:mazer.data.size.x.toString(), y:mazer.data.size.y.toString()},
-        cellSize: {x:mazer.cellSize.x.toString(), y:mazer.cellSize.y.toString()},
-        thickness: {x:mazer.thickness.x.toString(), y:mazer.thickness.y.toString()}
+        size: new DOMPoint(mazer.data.size.x, mazer.data.size.y),
+        cellSize: new DOMPoint(mazer.cellSize.x, mazer.cellSize.y),
+        thickness: new DOMPoint(mazer.thickness.x, mazer.thickness.y),
+        mazeDirty: false,
+        metricsDirty: false,
     });
 
     const applyMazeCells = useCallback(() => {
-        mazer.data.size.x = parseUserInt(data.size.x, 1, Infinity);
-        mazer.data.size.y = parseUserInt(data.size.y, 1, Infinity);
+        mazer.data.size.x = data.size.x;
+        mazer.data.size.y = data.size.y;
+
+        setData({
+            ...data,
+            mazeDirty: false
+        });
 
         mazer.data.build();
         mazer.render();
     }, [data, mazer]);
 
-    const applyCellMetrics = useCallback(() => {
-        mazer.cellSize.x = parseUserFloat(data.cellSize.x, 0, Infinity);
-        mazer.cellSize.y = parseUserFloat(data.cellSize.y, 0, Infinity);
+    const applyCellMetrics = useCallback(() => {console.log('apply');
+        mazer.cellSize.x = data.cellSize.x;
+        mazer.cellSize.y = data.cellSize.y;
 
-        mazer.thickness.x = parseUserFloat(data.thickness.x, 0, 0.5);
-        mazer.thickness.y = parseUserFloat(data.thickness.y, 0, 0.5);
+        mazer.thickness.x = data.thickness.x;
+        mazer.thickness.y = data.thickness.y;
+
+        setData({
+            ...data,
+            metricsDirty: false
+        });
 
         mazer.render();
+    }, [data, mazer]);
+
+    const cancelMazeCells = useCallback(() => {
+        setData({
+            ...data,
+            size: new DOMPoint(mazer.data.size.x, mazer.data.size.y),
+            mazeDirty: false,
+        });
+    }, [data, mazer]);
+
+    const cancelCellMetrics = useCallback(() => {
+        setData({
+            ...data,
+            cellSize: new DOMPoint(mazer.cellSize.x, mazer.cellSize.y),
+            thickness: new DOMPoint(mazer.thickness.x, mazer.thickness.y),
+            metricsDirty: false,
+        });
     }, [data, mazer]);
 
     const exportData = useCallback(() => {
@@ -72,43 +86,41 @@ export default function Toolbar({mazer}: ToolbarProps) {
                 <div className="ToolbarSectionBody">
                     <div>
                         <span className="ToolbarInputLabelLeft">Cells X</span>
-                        <input type="text"
-                               value={data.size.x}
-                               onChange={(e) => {
-                                   setData({
-                                       ...data,
-                                       size: {x:e.target.value, y:data.size.y},
-                                   });
-                               }}
-                               onBlur={(e) => {
-                                   setData({
-                                       ...data,
-                                       size: {x: parseUserInt(e.target.value, 2, Infinity).toString(), y:data.size.y}
-                                   });
-                               }}
+                        <NumberInput value={data.size.x}
+                                     min={2}
+                                     isInteger={true}
+                                     onChange={(value) => {
+                                         setData({
+                                             ...data,
+                                             size: new DOMPoint(value, data.size.y),
+                                             mazeDirty: mazer.data.size.x !== value
+                                                || mazer.data.size.y !== data.size.y
+                                         });
+                                     }}
                         />
                         <span className="ToolbarInputLabel">Y</span>
-                        <input type="text"
-                               value={data.size.y}
-                               onChange={(e) => {
-                                   setData({
-                                       ...data,
-                                       size: {x:data.size.x, y:e.target.value},
-                                   });
-                               }}
-                               onBlur={(e) => {
-                                   setData({
-                                       ...data,
-                                       size: {x:data.size.x, y: parseUserInt(e.target.value, 2, Infinity).toString()}
-                                   });
-                               }}
+                        <NumberInput value={data.size.y}
+                                     min={2}
+                                     isInteger={true}
+                                     onChange={(value) => {
+                                         setData({
+                                             ...data,
+                                             size: new DOMPoint(data.size.x, value),
+                                             mazeDirty: mazer.data.size.x !== data.size.x
+                                                || mazer.data.size.y !== value
+                                         });
+                                     }}
                         />
                     </div>
                     <div className="ToolbarBodyCtrl">
                         <input type="button"
-                               value="Apply"
+                               value={data.mazeDirty ? 'Apply' : 'Randomize'}
                                onClick={applyMazeCells}
                         />
+                        {data.mazeDirty && <input type="button"
+                               value="Cancel"
+                               onClick={cancelMazeCells}
+                        />}
                     </div>
                 </div>
             </div>
@@ -117,70 +129,76 @@ export default function Toolbar({mazer}: ToolbarProps) {
                 <div className="ToolbarSectionBody">
                     <div>
                         <span className="ToolbarInputLabelLeft">Size X</span>
-                        <input type="text"
-                               value={data.cellSize.x}
-                               onChange={(e) => {
-                                   setData({
-                                       ...data,
-                                       cellSize: {x:e.target.value, y:data.cellSize.y}
-                                   });
-                               }}
-                               onBlur={(e) => {
-                                   setData({
-                                       ...data,
-                                       cellSize: {x: parseUserInt(e.target.value, 0, Infinity).toString(), y:data.cellSize.y}
-                                   });
-                               }}
+                        <NumberInput value={data.cellSize.x}
+                                     min={0}
+                                     onChange={(value) => {
+                                         setData({
+                                             ...data,
+                                             cellSize: new DOMPoint(value, data.cellSize.y),
+                                             metricsDirty: mazer.cellSize.x !== value
+                                                 || mazer.cellSize.y !== data.cellSize.y
+                                                 || mazer.thickness.x !== data.thickness.x
+                                                 || mazer.thickness.y !== data.thickness.y
+                                         });
+                                     }}
                         />
                         <span className="ToolbarInputLabel">Y</span>
-                        <input type="text"
-                               value={data.cellSize.y}
-                               onChange={(e) => {
-                                   setData({
-                                       ...data,
-                                       cellSize: {x:data.cellSize.x, y:e.target.value}
-                                   });
-                               }}
+                        <NumberInput value={data.cellSize.y}
+                                     min={0}
+                                     onChange={(value) => {
+                                         setData({
+                                             ...data,
+                                             cellSize: new DOMPoint(data.cellSize.x, value),
+                                             metricsDirty: mazer.cellSize.x !== data.cellSize.x
+                                                 || mazer.cellSize.y !== value
+                                                 || mazer.thickness.x !== data.thickness.x
+                                                 || mazer.thickness.y !== data.thickness.y
+                                         });
+                                     }}
                         />
                     </div>
                     <div>
                         <span className="ToolbarInputLabelLeft">Wall X</span>
-                        <input type="text"
-                               value={data.thickness.x}
-                               onChange={(e) => {
-                                   setData({
-                                       ...data,
-                                       thickness: {x:e.target.value, y:data.thickness.y}
-                                   });
-                               }}
-                               onBlur={(e) => {
-                                   setData({
-                                       ...data,
-                                       thickness: {x: parseUserFloat(e.target.value, 0, 0.5).toString(), y:data.thickness.y}
-                                   });
-                               }}
+                        <NumberInput value={data.thickness.x}
+                                     min={0}
+                                     max={0.5}
+                                     onChange={(value) => {
+                                         setData({
+                                             ...data,
+                                             thickness: new DOMPoint(value, data.thickness.y),
+                                             metricsDirty: mazer.cellSize.x !== data.cellSize.x
+                                                 || mazer.cellSize.y !== data.cellSize.y
+                                                 || mazer.thickness.x !== value
+                                                 || mazer.thickness.y !== data.thickness.y
+                                         });
+                                     }}
                         />
                         <span className="ToolbarInputLabel">Y</span>
-                        <input type="text"
-                               value={data.thickness.y}
-                               onChange={(e) => {
-                                   setData({
-                                       ...data,
-                                       thickness: {x:data.thickness.x, y:e.target.value}
-                                   });
-                               }}
-                               onBlur={(e) => {
-                                   setData({
-                                       ...data,
-                                       thickness: {x:data.thickness.x, y:parseUserFloat(e.target.value, 0, 0.5).toString()}
-                                   });
-                               }}
+                        <NumberInput value={data.thickness.y}
+                                     min={0}
+                                     max={0.5}
+                                     onChange={(value) => {
+                                         setData({
+                                             ...data,
+                                             thickness: new DOMPoint(data.thickness.x, value),
+                                             metricsDirty: mazer.cellSize.x !== data.cellSize.x
+                                                 || mazer.cellSize.y !== data.cellSize.y
+                                                 || mazer.thickness.x !== data.thickness.x
+                                                 || mazer.thickness.y !== value
+                                         });
+                                     }}
                         />
                     </div>
                     <div className="ToolbarBodyCtrl">
                         <input type="button"
                                value="Apply"
+                               disabled={!data.metricsDirty}
                                onClick={applyCellMetrics}
+                        />
+                        <input type="button"
+                               value="Cancel"
+                               disabled={!data.metricsDirty}
+                               onClick={cancelCellMetrics}
                         />
                     </div>
                 </div>
