@@ -1,13 +1,13 @@
 .View {
     display: flex;
     flex: 1 1 0;
-    align-items: center;
-    justify-content: center;
+    align-items: safe center;
+    justify-content: safe center;
     overflow: auto;
     background-color: #2f3334;
 }
 
 .View canvas {
     display: block;
-    margin: 0;
+    margin: 10px;
 }

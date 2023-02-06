@@ -7,6 +7,7 @@
 
 .Toolbar input[type=text] {
     width: 45px;
+    border: 1px solid #191B1C;
 }
 
 .Toolbar input[type=text].invalid {
@@ -38,6 +39,10 @@
 .ToolbarBodyCtrl {
     margin-top: 10px;
     text-align: center;
+}
+
+.ToolbarBodyCtrl input[type=button] {
+    margin: 0 2px;
 }
 
 .ToolbarInputLabel {
