@@ -75,6 +75,8 @@ export default function Toolbar({mazer}: ToolbarProps) {
             throw new Error('unable to create export window');
         }
 
+        win.focus();
+        win.document.body.innerHTML = '';
         win.document.write('<pre>' + mazer.builder.getWavefrontObjExport(mazer) + '</pre>');
         win.document.title = 'Mazer Export';
     }, [mazer]);
