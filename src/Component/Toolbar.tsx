@@ -33,23 +33,20 @@ export default function Toolbar({mazer}: ToolbarProps) {
             mazeDirty: false
         });
 
-        mazer.data.build();
-        mazer.render();
+        mazer.data.build(mazer.thickness);//mazer.cellSize, mazer.wallSize);
+        mazer.view.render(mazer.cellSize);
     }, [data, mazer]);
 
     const applyCellMetrics = useCallback(() => {console.log('apply');
-        mazer.cellSize.x = data.cellSize.x;
-        mazer.cellSize.y = data.cellSize.y;
-
-        mazer.thickness.x = data.thickness.x;
-        mazer.thickness.y = data.thickness.y;
-
         setData({
             ...data,
             metricsDirty: false
         });
 
-        mazer.render();
+        mazer.setCellSize(data.cellSize.x, data.cellSize.y);
+        mazer.setThickness(data.thickness.x, data.thickness.y);
+
+        mazer.view.render(mazer.cellSize);
     }, [data, mazer]);
 
     const cancelMazeCells = useCallback(() => {
@@ -77,7 +74,7 @@ export default function Toolbar({mazer}: ToolbarProps) {
 
         win.focus();
         win.document.body.innerHTML = '';
-        win.document.write('<pre>' + mazer.builder.getWavefrontObjExport(mazer) + '</pre>');
+        win.document.write('<pre>' + mazer.exporter.getWavefrontObjExport(mazer.cellSize, mazer.thickness) + '</pre>');
         win.document.title = 'Mazer Export';
     }, [mazer]);
 
@@ -127,7 +124,7 @@ export default function Toolbar({mazer}: ToolbarProps) {
                 </div>
             </div>
             <div className="ToolbarSection">
-                <div className="ToolbarSectionTitle">Cell Metrics</div>
+                <div className="ToolbarSectionTitle">View Properties</div>
                 <div className="ToolbarSectionBody">
                     <div>
                         <span className="ToolbarInputLabelLeft">Size X</span>
